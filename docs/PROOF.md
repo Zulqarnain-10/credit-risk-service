@@ -134,7 +134,7 @@ model on the test split and require each headline metric to be within 0.002 of
 
 Badge: [![CI](https://github.com/Zulqarnain-10/credit-risk-service/actions/workflows/ci.yml/badge.svg)](https://github.com/Zulqarnain-10/credit-risk-service/actions/workflows/ci.yml)
 
-CI run: [todo: CI run link after first push]
+CI run: [Actions run 33664125882](https://github.com/Zulqarnain-10/credit-risk-service/actions/runs/33664125882)
 
 MLflow run: [todo: MLflow run link if DagsHub is added]. Locally, the winner's run id is
 `models/version.json` `mlflow_run_id` (864b4665479043508627044a72119946) in experiment
