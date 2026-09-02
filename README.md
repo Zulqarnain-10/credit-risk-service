@@ -3,7 +3,7 @@
 [![CI](https://github.com/Zulqarnain-10/credit-risk-service/actions/workflows/ci.yml/badge.svg)](https://github.com/Zulqarnain-10/credit-risk-service/actions/workflows/ci.yml)
 [![Deploy](https://github.com/Zulqarnain-10/credit-risk-service/actions/workflows/cd.yml/badge.svg)](https://github.com/Zulqarnain-10/credit-risk-service/actions/workflows/cd.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-3B96FF.svg)](LICENSE)
-![Live](https://img.shields.io/badge/live-%5Btodo%5D-FF6B35)
+[![Live](https://img.shields.io/badge/live-Hugging%20Face%20Space-3B96FF)](https://syedzulqarnainh-credit-risk-service.hf.space)
 
 A credit-default risk model shipped like a product: versioned data, tracked experiments, a tested
 API, CI/CD, a live endpoint, and drift monitoring.
@@ -20,10 +20,9 @@ prediction the API returns.
 
 ## Live demo and one-command run
 
-Live endpoint: [todo: live URL after first deploy]. The Deploy workflow targets a Hugging Face
-Space (Docker SDK); Docker Spaces now sit behind a paid Hugging Face plan, so the first deploy
-waits on a hosting decision, with a Render free service (`render.yaml`) as the fallback. Either
-host sleeps after a period of inactivity and takes a few seconds to wake.
+Live endpoint: [https://syedzulqarnainh-credit-risk-service.hf.space](https://syedzulqarnainh-credit-risk-service.hf.space), a Hugging Face Space built from this
+repository's Dockerfile. The Space stays warm on the paid plan; if it ever sleeps it takes a few
+seconds to wake. A Render free service (`render.yaml`) is the documented fallback host.
 
 Run the same service on your machine with one command:
 
@@ -102,7 +101,7 @@ Threshold policy, chosen on the validation split and then applied unchanged to t
 | Cost-optimal, the API default (5:1 cost matrix, illustrative) | 0.155 | 0.3667 | 0.7905 | 0.4768 |
 | Precision target 0.60 | 0.365 | 0.6144 | 0.4574 | 0.1647 |
 
-Latency: p95 763.85 ms for POST /predict, 300 requests at concurrency 10, on local uvicorn, Windows 11, Python 3.12, single process (reports/loadtest.json).
+Latency: p95 382.32 ms for POST /predict, 300 requests at concurrency 10, on Hugging Face Space, CPU basic, Docker, single process (reports/loadtest.json).
 
 Fairness at the cost-optimal threshold, from held-out labels: demographic parity ratio 0.9234 by sex and 0.7887 by age band (reports/fairness.json).
 
@@ -130,7 +129,7 @@ one individually; this table is the short version.
 | The three demo applicants and their scores | [configs/presets.json](configs/presets.json) | `python -m credit_risk.presets` (stage `presets`) |
 | Row counts and positive rate per split | `data/processed/splits/split_manifest.json` (rebuilt by `dvc repro`, not committed; copied into the [data card](data/DATA_CARD.md)) | `python -m credit_risk.split` (stage `split`) |
 
-CI run that reproduced these numbers: [todo: CI run link after first push].
+CI run that reproduced these numbers: [Actions, run 33664125882](https://github.com/Zulqarnain-10/credit-risk-service/actions/runs/33664125882).
 
 ## Stack
 
@@ -248,10 +247,9 @@ than 0.005.
 - `AGE` and `EDUCATION` stay in the model. The fairness report measures the resulting gaps by
   age band; the [model card](models/MODEL_CARD.md) explains the choice and what a real
   deployment would have to review.
-- Latency was measured on a local uvicorn process on a Windows laptop, not on the Space. Between
-  requests the laptop parks idle cores, so single requests run slower than the same model in a
-  tight loop; the number is reported as measured. A live load test against the Space, an MLflow
-  tracking server on DagsHub, and a time-based validation split are the next steps.
+- Latency was measured against the live Space from a laptop on the public internet, so it
+  includes network time; the receipt names the host. An MLflow tracking server on DagsHub and a
+  time-based validation split are the next steps.
 
 ## About
 
