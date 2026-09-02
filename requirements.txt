@@ -1,0 +1,17 @@
+# Serving dependencies only, pinned to the versions the model was trained and tested with.
+# The pipeline and dev tools live in requirements-pipeline.txt and requirements-dev.txt.
+numpy==2.5.2
+pandas==2.3.3
+scipy==1.18.1
+scikit-learn==1.9.0
+joblib==1.6.0
+PyYAML==6.0.3
+pydantic==2.13.5
+fastapi==0.141.1
+uvicorn==0.52.4
+# uvicorn's default http=auto parser is httptools whenever the package imports, so it stays.
+httptools==0.8.0
+prometheus-fastapi-instrumentator==8.1.0
+# httpx is imported by credit_risk.loadtest, which ships inside the package.
+httpx==0.28.1
+python-json-logger==4.2.0

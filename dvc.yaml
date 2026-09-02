@@ -1,0 +1,142 @@
+stages:
+  fetch:
+    desc: Download the UCI id 350 archive, verify its sha256, and write the raw CSV.
+    cmd: python -m credit_risk.data fetch
+    deps:
+      - src/credit_risk/data.py
+      - src/credit_risk/settings.py
+    params:
+      - data
+    outs:
+      - data/raw/credit_default_raw.csv
+
+  validate:
+    desc: Enforce the pandera schema and collapse undocumented category codes.
+    cmd: python -m credit_risk.validate
+    deps:
+      - src/credit_risk/validate.py
+      - src/credit_risk/data.py
+      - src/credit_risk/settings.py
+      - data/raw/credit_default_raw.csv
+    params:
+      - data
+      - features
+    outs:
+      - data/processed/validated.csv
+
+  features:
+    desc: Engineer utilization, payment, delinquency, and trend features.
+    cmd: python -m credit_risk.features
+    deps:
+      - src/credit_risk/features.py
+      - src/credit_risk/settings.py
+      - data/processed/validated.csv
+    params:
+      - features
+    outs:
+      - data/processed/features.csv
+
+  split:
+    desc: Stratified 60/20/20 train, validation, test split with a saved manifest.
+    cmd: python -m credit_risk.split
+    deps:
+      - src/credit_risk/split.py
+      - src/credit_risk/data.py
+      - src/credit_risk/settings.py
+      - data/processed/features.csv
+    params:
+      - split
+    outs:
+      - data/processed/splits/train.csv
+      - data/processed/splits/val.csv
+      - data/processed/splits/test.csv
+      - data/processed/splits/split_manifest.json:
+          cache: false
+
+  train:
+    desc: Train the logistic-regression baseline and the HGB model, log both to MLflow, keep the winner.
+    cmd: python -m credit_risk.train
+    deps:
+      - src/credit_risk/train.py
+      - src/credit_risk/features.py
+      - src/credit_risk/settings.py
+      - data/processed/splits/train.csv
+      - data/processed/splits/val.csv
+    params:
+      - train
+    outs:
+      - models/model.joblib:
+          cache: false
+      - models/baseline_logreg.joblib:
+          cache: false
+      - models/version.json:
+          cache: false
+
+  evaluate:
+    desc: Choose thresholds on validation, report held-out test metrics, importance, and figures.
+    cmd: python -m credit_risk.evaluate
+    deps:
+      - src/credit_risk/evaluate.py
+      - src/credit_risk/features.py
+      - src/credit_risk/settings.py
+      - src/credit_risk/train.py
+      - models/model.joblib
+      - models/baseline_logreg.joblib
+      - models/version.json
+      - data/processed/splits/val.csv
+      - data/processed/splits/test.csv
+    params:
+      - threshold
+      - evaluate
+    metrics:
+      - reports/metrics.json:
+          cache: false
+    outs:
+      - reports/importance.json:
+          cache: false
+      - reports/figures:
+          cache: false
+
+  presets:
+    desc: Three real held-out applicants (low risk, borderline, high risk) for the demo page.
+    cmd: python -m credit_risk.presets
+    deps:
+      - src/credit_risk/presets.py
+      - src/credit_risk/features.py
+      - src/credit_risk/settings.py
+      - models/model.joblib
+      - models/version.json
+      - reports/metrics.json
+      - data/processed/splits/test.csv
+    outs:
+      - configs/presets.json:
+          cache: false
+
+  fairness:
+    desc: Selection rate, TPR, and FPR by sex and by age band on the held-out test split.
+    cmd: python -m credit_risk.fairness
+    deps:
+      - src/credit_risk/fairness.py
+      - src/credit_risk/settings.py
+      - models/model.joblib
+      - reports/metrics.json
+      - data/processed/splits/test.csv
+    params:
+      - fairness
+    outs:
+      - reports/fairness.json:
+          cache: false
+
+  drift_baseline:
+    desc: Reference distributions of features and scores from the training split, for PSI checks.
+    cmd: python -m credit_risk.monitoring baseline
+    deps:
+      - src/credit_risk/monitoring.py
+      - src/credit_risk/features.py
+      - src/credit_risk/settings.py
+      - models/model.joblib
+      - models/version.json
+      - data/processed/splits/train.csv
+    outs:
+      - reports/drift_baseline.json:
+          cache: false

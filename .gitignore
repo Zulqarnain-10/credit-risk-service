@@ -1,0 +1,54 @@
+# Environments and secrets
+.venv/
+venv/
+.env
+*.env
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# Data (DVC-managed, re-fetched deterministically)
+data/raw/
+data/processed/
+
+# Experiment tracking (local file store)
+mlruns/
+mlartifacts/
+
+# DVC internals
+.dvc/cache/
+.dvc/tmp/
+
+# Prediction logs and scratch
+logs/
+*.jsonl
+!configs/*.jsonl
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Space staging folder produced by scripts/deploy_space.py
+.space_build/
+
+# Private planning documents: kept on the owner's machine, never published
+/CLAUDE.md
+/docs/BRIEF.md
+/docs/STATUS.md
+/docs/LINKEDIN_ENTRY.md
+/docs/POST_DRAFT.md
+/docs/RESUME_BULLET.md
+/docs/sync_private_drafts.py

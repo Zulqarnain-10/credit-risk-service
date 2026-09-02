@@ -1,0 +1,71 @@
+# Single source of pipeline parameters. Every stage in dvc.yaml reads from here.
+
+data:
+  uci_id: 350
+  url: "https://archive.ics.uci.edu/static/public/350/default+of+credit+card+clients.zip"
+  zip_sha256: "56c885f84457f6680f8438f02bfcdac9579323d8a94465ee5f26e32baa727602"
+  xls_sha256: "30c6be3abd8dcfd3e6096c828bad8c2f011238620f5369220bd60cfc82700933"
+  xls_name: "default of credit card clients.xls"
+  target: "default_next_month"
+
+split:
+  seed: 42
+  train: 0.6
+  val: 0.2
+  test: 0.2
+
+features:
+  # Protected attributes: never model inputs. Kept in the split files for the fairness report only.
+  excluded: ["SEX", "MARRIAGE"]
+  # Undocumented category codes collapse into the documented "other" bucket.
+  education_other_codes: [0, 5, 6]
+  education_other_value: 4
+  marriage_other_codes: [0]
+  marriage_other_value: 3
+
+train:
+  seed: 42
+  primary: "hgb"
+  logreg:
+    C: 1.0
+    max_iter: 2000
+  hgb:
+    learning_rate: 0.05
+    max_iter: 400
+    max_leaf_nodes: 31
+    min_samples_leaf: 40
+    l2_regularization: 1.0
+    early_stopping: true
+    validation_fraction: 0.15
+    n_iter_no_change: 30
+  mlflow:
+    experiment: "credit-risk"
+    registered_model: "credit-risk"
+
+threshold:
+  # Illustrative cost matrix, not a business calibration. A missed default (false negative) is
+  # assumed to cost five times a wrongly declined good customer (false positive).
+  cost_false_negative: 5.0
+  cost_false_positive: 1.0
+  target_precision: 0.60
+  grid_step: 0.005
+
+evaluate:
+  calibration_bins: 10
+  importance_repeats: 10
+  importance_top_n: 15
+
+fairness:
+  # Age bands: inclusive lower bound, exclusive upper bound.
+  age_bands: [21, 30, 40, 50, 100]
+
+drift:
+  # Simulated production batch: the test split with a deliberate, documented perturbation.
+  seed: 7
+  limit_bal_scale: 0.85
+  age_shift_years: 4
+  bill_amt_scale: 1.25
+  pay_status_shift_share: 0.15
+
+smoke_train:
+  sample_rows: 2000

@@ -1,0 +1,14 @@
+# Fallback host. Render builds the Dockerfile and runs it as a free web service.
+# The primary host is Hugging Face Spaces (see .github/workflows/cd.yml).
+services:
+  - type: web
+    name: credit-risk-service
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: PORT
+        value: "8000"

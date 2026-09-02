@@ -1,0 +1,380 @@
+schema: '2.0'
+stages:
+  fetch:
+    cmd: python -m credit_risk.data fetch
+    deps:
+    - path: src/credit_risk/data.py
+      hash: md5
+      md5: ffc157566ae75344d6e3eb1a0ee515e4
+      size: 9996
+    - path: src/credit_risk/settings.py
+      hash: md5
+      md5: 439c16c88802425c0d3dbd6963b21a19
+      size: 6377
+    params:
+      params.yaml:
+        data:
+          uci_id: 350
+          url: 
+            https://archive.ics.uci.edu/static/public/350/default+of+credit+card+clients.zip
+          zip_sha256: 
+            56c885f84457f6680f8438f02bfcdac9579323d8a94465ee5f26e32baa727602
+          xls_sha256: 
+            30c6be3abd8dcfd3e6096c828bad8c2f011238620f5369220bd60cfc82700933
+          xls_name: default of credit card clients.xls
+          target: default_next_month
+    outs:
+    - path: data/raw/credit_default_raw.csv
+      hash: md5
+      md5: ff5bd39ebc8c2c0aeebef09b3f72cf50
+      size: 2867200
+  validate:
+    cmd: python -m credit_risk.validate
+    deps:
+    - path: data/raw/credit_default_raw.csv
+      hash: md5
+      md5: ff5bd39ebc8c2c0aeebef09b3f72cf50
+      size: 2867200
+    - path: src/credit_risk/data.py
+      hash: md5
+      md5: ffc157566ae75344d6e3eb1a0ee515e4
+      size: 9996
+    - path: src/credit_risk/settings.py
+      hash: md5
+      md5: 439c16c88802425c0d3dbd6963b21a19
+      size: 6377
+    - path: src/credit_risk/validate.py
+      hash: md5
+      md5: 0a7780a8d919b3462facd9915a7817b0
+      size: 5532
+    params:
+      params.yaml:
+        data:
+          uci_id: 350
+          url: 
+            https://archive.ics.uci.edu/static/public/350/default+of+credit+card+clients.zip
+          zip_sha256: 
+            56c885f84457f6680f8438f02bfcdac9579323d8a94465ee5f26e32baa727602
+          xls_sha256: 
+            30c6be3abd8dcfd3e6096c828bad8c2f011238620f5369220bd60cfc82700933
+          xls_name: default of credit card clients.xls
+          target: default_next_month
+        features:
+          excluded:
+          - SEX
+          - MARRIAGE
+          education_other_codes:
+          - 0
+          - 5
+          - 6
+          education_other_value: 4
+          marriage_other_codes:
+          - 0
+          marriage_other_value: 3
+    outs:
+    - path: data/processed/validated.csv
+      hash: md5
+      md5: ca1a6b0dca9f74d6ec698048f5ec9f0b
+      size: 2867200
+  features:
+    cmd: python -m credit_risk.features
+    deps:
+    - path: data/processed/validated.csv
+      hash: md5
+      md5: ca1a6b0dca9f74d6ec698048f5ec9f0b
+      size: 2867200
+    - path: src/credit_risk/features.py
+      hash: md5
+      md5: 7e9744b3d5bf51bb0fc2c38883cb8479
+      size: 4592
+    - path: src/credit_risk/settings.py
+      hash: md5
+      md5: 439c16c88802425c0d3dbd6963b21a19
+      size: 6377
+    params:
+      params.yaml:
+        features:
+          excluded:
+          - SEX
+          - MARRIAGE
+          education_other_codes:
+          - 0
+          - 5
+          - 6
+          education_other_value: 4
+          marriage_other_codes:
+          - 0
+          marriage_other_value: 3
+    outs:
+    - path: data/processed/features.csv
+      hash: md5
+      md5: 30ad884ef0216ccea085fe5f7b952fad
+      size: 11069166
+  split:
+    cmd: python -m credit_risk.split
+    deps:
+    - path: data/processed/features.csv
+      hash: md5
+      md5: 30ad884ef0216ccea085fe5f7b952fad
+      size: 11069166
+    - path: src/credit_risk/data.py
+      hash: md5
+      md5: ffc157566ae75344d6e3eb1a0ee515e4
+      size: 9996
+    - path: src/credit_risk/settings.py
+      hash: md5
+      md5: 439c16c88802425c0d3dbd6963b21a19
+      size: 6377
+    - path: src/credit_risk/split.py
+      hash: md5
+      md5: 2d133d0596039ec48642c53768bd9057
+      size: 3391
+    params:
+      params.yaml:
+        split:
+          seed: 42
+          train: 0.6
+          val: 0.2
+          test: 0.2
+    outs:
+    - path: data/processed/splits/split_manifest.json
+      hash: md5
+      md5: e6a7befcf780e6c4f23bc09e40e32551
+      size: 676
+    - path: data/processed/splits/test.csv
+      hash: md5
+      md5: d3af6abe4f90fc9fcbbb357443808d0a
+      size: 2158988
+    - path: data/processed/splits/train.csv
+      hash: md5
+      md5: 12d051dba3e4463a6e43dd64c881d73b
+      size: 6480268
+    - path: data/processed/splits/val.csv
+      hash: md5
+      md5: 98953669c54badcd51862a1631db0245
+      size: 2160468
+  train:
+    cmd: python -m credit_risk.train
+    deps:
+    - path: data/processed/splits/train.csv
+      hash: md5
+      md5: 12d051dba3e4463a6e43dd64c881d73b
+      size: 6480268
+    - path: data/processed/splits/val.csv
+      hash: md5
+      md5: 98953669c54badcd51862a1631db0245
+      size: 2160468
+    - path: src/credit_risk/features.py
+      hash: md5
+      md5: 7e9744b3d5bf51bb0fc2c38883cb8479
+      size: 4592
+    - path: src/credit_risk/settings.py
+      hash: md5
+      md5: 439c16c88802425c0d3dbd6963b21a19
+      size: 6377
+    - path: src/credit_risk/train.py
+      hash: md5
+      md5: 8622f3824067941704e82efa61a24371
+      size: 16327
+    params:
+      params.yaml:
+        train:
+          seed: 42
+          primary: hgb
+          logreg:
+            C: 1.0
+            max_iter: 2000
+          hgb:
+            learning_rate: 0.05
+            max_iter: 400
+            max_leaf_nodes: 31
+            min_samples_leaf: 40
+            l2_regularization: 1.0
+            early_stopping: true
+            validation_fraction: 0.15
+            n_iter_no_change: 30
+          mlflow:
+            experiment: credit-risk
+            registered_model: credit-risk
+    outs:
+    - path: models/baseline_logreg.joblib
+      hash: md5
+      md5: 2dc07758b98d1b964bb7a77c0265c4be
+      size: 2624
+    - path: models/model.joblib
+      hash: md5
+      md5: 67209f0c20846f40ae060aafcd487670
+      size: 195554
+    - path: models/version.json
+      hash: md5
+      md5: 3fd87f2a0d95deb0133ed3510a189a84
+      size: 1829
+  evaluate:
+    cmd: python -m credit_risk.evaluate
+    deps:
+    - path: data/processed/splits/test.csv
+      hash: md5
+      md5: d3af6abe4f90fc9fcbbb357443808d0a
+      size: 2158988
+    - path: data/processed/splits/val.csv
+      hash: md5
+      md5: 98953669c54badcd51862a1631db0245
+      size: 2160468
+    - path: models/baseline_logreg.joblib
+      hash: md5
+      md5: 2dc07758b98d1b964bb7a77c0265c4be
+      size: 2624
+    - path: models/model.joblib
+      hash: md5
+      md5: 67209f0c20846f40ae060aafcd487670
+      size: 195554
+    - path: models/version.json
+      hash: md5
+      md5: 3fd87f2a0d95deb0133ed3510a189a84
+      size: 1829
+    - path: src/credit_risk/evaluate.py
+      hash: md5
+      md5: eba657a680f587a332bfecb0769ad90c
+      size: 15207
+    - path: src/credit_risk/features.py
+      hash: md5
+      md5: 7e9744b3d5bf51bb0fc2c38883cb8479
+      size: 4592
+    - path: src/credit_risk/settings.py
+      hash: md5
+      md5: 439c16c88802425c0d3dbd6963b21a19
+      size: 6377
+    - path: src/credit_risk/train.py
+      hash: md5
+      md5: 8622f3824067941704e82efa61a24371
+      size: 16327
+    params:
+      params.yaml:
+        evaluate:
+          calibration_bins: 10
+          importance_repeats: 10
+          importance_top_n: 15
+        threshold:
+          cost_false_negative: 5.0
+          cost_false_positive: 1.0
+          target_precision: 0.6
+          grid_step: 0.005
+    outs:
+    - path: reports/figures
+      hash: md5
+      md5: b0a81d75c336a600bdaca56fbdf818c2.dir
+      size: 247402
+      nfiles: 4
+    - path: reports/importance.json
+      hash: md5
+      md5: 416ee645609de805aafc042739c5be83
+      size: 2535
+    - path: reports/metrics.json
+      hash: md5
+      md5: 824090e76d6d216addd5b4677c932809
+      size: 2131
+  presets:
+    cmd: python -m credit_risk.presets
+    deps:
+    - path: data/processed/splits/test.csv
+      hash: md5
+      md5: d3af6abe4f90fc9fcbbb357443808d0a
+      size: 2158988
+    - path: models/model.joblib
+      hash: md5
+      md5: 67209f0c20846f40ae060aafcd487670
+      size: 195554
+    - path: models/version.json
+      hash: md5
+      md5: 3fd87f2a0d95deb0133ed3510a189a84
+      size: 1829
+    - path: reports/metrics.json
+      hash: md5
+      md5: 824090e76d6d216addd5b4677c932809
+      size: 2131
+    - path: src/credit_risk/features.py
+      hash: md5
+      md5: 7e9744b3d5bf51bb0fc2c38883cb8479
+      size: 4592
+    - path: src/credit_risk/presets.py
+      hash: md5
+      md5: cffcfc9340fd5ebf86f4d55cf41963ce
+      size: 5207
+    - path: src/credit_risk/settings.py
+      hash: md5
+      md5: 439c16c88802425c0d3dbd6963b21a19
+      size: 6377
+    outs:
+    - path: configs/presets.json
+      hash: md5
+      md5: 0e807ebda793f7616ec966c15b42b198
+      size: 2705
+  fairness:
+    cmd: python -m credit_risk.fairness
+    deps:
+    - path: data/processed/splits/test.csv
+      hash: md5
+      md5: d3af6abe4f90fc9fcbbb357443808d0a
+      size: 2158988
+    - path: models/model.joblib
+      hash: md5
+      md5: 67209f0c20846f40ae060aafcd487670
+      size: 195554
+    - path: reports/metrics.json
+      hash: md5
+      md5: 824090e76d6d216addd5b4677c932809
+      size: 2131
+    - path: src/credit_risk/fairness.py
+      hash: md5
+      md5: 64033c99e7a5ec0adde57aa1abe7e92a
+      size: 4925
+    - path: src/credit_risk/settings.py
+      hash: md5
+      md5: 439c16c88802425c0d3dbd6963b21a19
+      size: 6377
+    params:
+      params.yaml:
+        fairness:
+          age_bands:
+          - 21
+          - 30
+          - 40
+          - 50
+          - 100
+    outs:
+    - path: reports/fairness.json
+      hash: md5
+      md5: 56d17be26e03eb774835ac5b69f59f03
+      size: 1992
+  drift_baseline:
+    cmd: python -m credit_risk.monitoring baseline
+    deps:
+    - path: data/processed/splits/train.csv
+      hash: md5
+      md5: 12d051dba3e4463a6e43dd64c881d73b
+      size: 6480268
+    - path: models/model.joblib
+      hash: md5
+      md5: 67209f0c20846f40ae060aafcd487670
+      size: 195554
+    - path: models/version.json
+      hash: md5
+      md5: 3fd87f2a0d95deb0133ed3510a189a84
+      size: 1829
+    - path: src/credit_risk/features.py
+      hash: md5
+      md5: 7e9744b3d5bf51bb0fc2c38883cb8479
+      size: 4592
+    - path: src/credit_risk/monitoring.py
+      hash: md5
+      md5: 3ca6e11db8ca07aa28c716fb38436fae
+      size: 27331
+    - path: src/credit_risk/settings.py
+      hash: md5
+      md5: 439c16c88802425c0d3dbd6963b21a19
+      size: 6377
+    outs:
+    - path: reports/drift_baseline.json
+      hash: md5
+      md5: 9c1d1aa62383ef940ca4d0ceef9c64af
+      size: 5606

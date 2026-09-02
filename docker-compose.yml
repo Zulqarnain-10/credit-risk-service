@@ -1,0 +1,37 @@
+# docker compose up                   -> the API on http://localhost:8000
+# docker compose --profile mlflow up  -> also the MLflow UI on http://localhost:5000 over ./mlruns
+#
+# The mlflow profile browses runs, parameters, and metrics. Artifact links resolve only when the UI
+# runs on the host, because the file store records absolute host paths for artifacts:
+#   MLFLOW_ALLOW_FILE_STORE=true mlflow ui --backend-store-uri file:./mlruns
+services:
+  api:
+    build: .
+    image: credit-risk-service:local
+    ports:
+      - "8000:8000"
+    environment:
+      PORT: "8000"
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=4)"
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+
+  mlflow:
+    profiles: ["mlflow"]
+    image: ghcr.io/mlflow/mlflow:v3.15.2
+    command: mlflow server --host 0.0.0.0 --port 5000 --backend-store-uri file:///mlruns
+    environment:
+      # MLflow 3 refuses the filesystem backend unless this opt-in is set.
+      MLFLOW_ALLOW_FILE_STORE: "true"
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./mlruns:/mlruns

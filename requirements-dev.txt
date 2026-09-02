@@ -1,0 +1,7 @@
+# Local development and CI: tests, lint, hooks, and the Space deploy script.
+-r requirements-pipeline.txt
+pytest==9.1.1
+pytest-cov==7.1.0
+ruff==0.16.5
+pre-commit==4.6.2
+huggingface_hub==0.36.1
