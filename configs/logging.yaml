@@ -1,0 +1,17 @@
+version: 1
+disable_existing_loggers: false
+formatters:
+  json:
+    (): pythonjsonlogger.json.JsonFormatter
+    format: "%(asctime)s %(levelname)s %(name)s %(message)s"
+handlers:
+  stdout:
+    class: logging.StreamHandler
+    formatter: json
+    stream: ext://sys.stdout
+root:
+  level: INFO
+  handlers: [stdout]
+loggers:
+  uvicorn.access:
+    level: WARNING
