@@ -1,0 +1,381 @@
+{
+  "generated_at": "2026-09-02T17:07:56Z",
+  "method": "evidently",
+  "method_detail": "evidently 0.7.21 DataDriftPreset, per-column test chosen by evidently (numerical: Wasserstein distance normed by the reference, categorical: Jensen-Shannon distance, both at threshold 0.1 for samples above 1000 rows); PSI from the saved reference histograms",
+  "model_version": "0.1.0+412322f",
+  "reference": {
+    "name": "train split",
+    "n": 18000
+  },
+  "current": {
+    "name": "Simulated production batch",
+    "n": 6000,
+    "source": "test split with the perturbation in params.drift; no production traffic",
+    "perturbation": {
+      "seed": 7,
+      "limit_bal_scale": 0.85,
+      "age_shift_years": 4,
+      "bill_amt_scale": 1.25,
+      "pay_status_shift_share": 0.15,
+      "pay_status_rows_shifted": 903
+    }
+  },
+  "n_features": 46,
+  "n_drifted": 18,
+  "drift_share": 0.3913,
+  "drift_share_threshold": 0.5,
+  "dataset_drift": false,
+  "features": [
+    {
+      "feature": "LIMIT_BAL",
+      "stat_test": "Wasserstein distance (normed)",
+      "score": 0.1885,
+      "threshold": 0.1,
+      "drifted": true
+    },
+    {
+      "feature": "EDUCATION",
+      "stat_test": "Jensen-Shannon distance",
+      "score": 0.005,
+      "threshold": 0.1,
+      "drifted": false
+    },
+    {
+      "feature": "AGE",
+      "stat_test": "Wasserstein distance (normed)",
+      "score": 0.4618,
+      "threshold": 0.1,
+      "drifted": true
+    },
+    {
+      "feature": "PAY_0",
+      "stat_test": "Jensen-Shannon distance",
+      "score": 0.067,
+      "threshold": 0.1,
+      "drifted": false
+    },
+    {
+      "feature": "PAY_2",
+      "stat_test": "Jensen-Shannon distance",
+      "score": 0.0098,
+      "threshold": 0.1,
+      "drifted": false
+    },
+    {
+      "feature": "PAY_3",
+      "stat_test": "Jensen-Shannon distance",
+      "score": 0.0152,
+      "threshold": 0.1,
+      "drifted": false
+    },
+    {
+      "feature": "PAY_4",
+      "stat_test": "Jensen-Shannon distance",
+      "score": 0.0147,
+      "threshold": 0.1,
+      "drifted": false
+    },
+    {
+      "feature": "PAY_5",
+      "stat_test": "Jensen-Shannon distance",
+      "score": 0.0163,
+      "threshold": 0.1,
+      "drifted": false
+    },
+    {
+      "feature": "PAY_6",
+      "stat_test": "Jensen-Shannon distance",
+      "score": 0.0207,
+      "threshold": 0.1,
+      "drifted": false
+    },
+    {
+      "feature": "BILL_AMT1",
+      "stat_test": "Wasserstein distance (normed)",
+      "score": 0.152,
+      "threshold": 0.1,
+      "drifted": true
+    },
+    {
+      "feature": "BILL_AMT2",
+      "stat_test": "Wasserstein distance (normed)",
+      "score": 0.1394,
+      "threshold": 0.1,
+      "drifted": true
+    },
+    {
+      "feature": "BILL_AMT3",
+      "stat_test": "Wasserstein distance (normed)",
+      "score": 0.142,
+      "threshold": 0.1,
+      "drifted": true
+    },
+    {
+      "feature": "BILL_AMT4",
+      "stat_test": "Wasserstein distance (normed)",
+      "score": 0.1431,
+      "threshold": 0.1,
+      "drifted": true
+    },
+    {
+      "feature": "BILL_AMT5",
+      "stat_test": "Wasserstein distance (normed)",
+      "score": 0.1418,
+      "threshold": 0.1,
+      "drifted": true
+    },
+    {
+      "feature": "BILL_AMT6",
+      "stat_test": "Wasserstein distance (normed)",
+      "score": 0.1446,
+      "threshold": 0.1,
+      "drifted": true
+    },
+    {
+      "feature": "PAY_AMT1",
+      "stat_test": "Wasserstein distance (normed)",
+      "score": 0.0124,
+      "threshold": 0.1,
+      "drifted": false
+    },
+    {
+      "feature": "PAY_AMT2",
+      "stat_test": "Wasserstein distance (normed)",
+      "score": 0.0146,
+      "threshold": 0.1,
+      "drifted": false
+    },
+    {
+      "feature": "PAY_AMT3",
+      "stat_test": "Wasserstein distance (normed)",
+      "score": 0.017,
+      "threshold": 0.1,
+      "drifted": false
+    },
+    {
+      "feature": "PAY_AMT4",
+      "stat_test": "Wasserstein distance (normed)",
+      "score": 0.021,
+      "threshold": 0.1,
+      "drifted": false
+    },
+    {
+      "feature": "PAY_AMT5",
+      "stat_test": "Wasserstein distance (normed)",
+      "score": 0.0097,
+      "threshold": 0.1,
+      "drifted": false
+    },
+    {
+      "feature": "PAY_AMT6",
+      "stat_test": "Wasserstein distance (normed)",
+      "score": 0.0123,
+      "threshold": 0.1,
+      "drifted": false
+    },
+    {
+      "feature": "util_1",
+      "stat_test": "Wasserstein distance (normed)",
+      "score": 0.4572,
+      "threshold": 0.1,
+      "drifted": true
+    },
+    {
+      "feature": "util_2",
+      "stat_test": "Wasserstein distance (normed)",
+      "score": 0.446,
+      "threshold": 0.1,
+      "drifted": true
+    },
+    {
+      "feature": "util_3",
+      "stat_test": "Wasserstein distance (normed)",
+      "score": 0.4324,
+      "threshold": 0.1,
+      "drifted": true
+    },
+    {
+      "feature": "util_4",
+      "stat_test": "Wasserstein distance (normed)",
+      "score": 0.4366,
+      "threshold": 0.1,
+      "drifted": true
+    },
+    {
+      "feature": "util_5",
+      "stat_test": "Wasserstein distance (normed)",
+      "score": 0.4239,
+      "threshold": 0.1,
+      "drifted": true
+    },
+    {
+      "feature": "util_6",
+      "stat_test": "Wasserstein distance (normed)",
+      "score": 0.4181,
+      "threshold": 0.1,
+      "drifted": true
+    },
+    {
+      "feature": "util_mean",
+      "stat_test": "Wasserstein distance (normed)",
+      "score": 0.47,
+      "threshold": 0.1,
+      "drifted": true
+    },
+    {
+      "feature": "util_max",
+      "stat_test": "Wasserstein distance (normed)",
+      "score": 0.5068,
+      "threshold": 0.1,
+      "drifted": true
+    },
+    {
+      "feature": "pay_ratio_1",
+      "stat_test": "Wasserstein distance (normed)",
+      "score": 0.0671,
+      "threshold": 0.1,
+      "drifted": false
+    },
+    {
+      "feature": "pay_ratio_2",
+      "stat_test": "Wasserstein distance (normed)",
+      "score": 0.0341,
+      "threshold": 0.1,
+      "drifted": false
+    },
+    {
+      "feature": "pay_ratio_3",
+      "stat_test": "Wasserstein distance (normed)",
+      "score": 0.0423,
+      "threshold": 0.1,
+      "drifted": false
+    },
+    {
+      "feature": "pay_ratio_4",
+      "stat_test": "Wasserstein distance (normed)",
+      "score": 0.0685,
+      "threshold": 0.1,
+      "drifted": false
+    },
+    {
+      "feature": "pay_ratio_5",
+      "stat_test": "Wasserstein distance (normed)",
+      "score": 0.0487,
+      "threshold": 0.1,
+      "drifted": false
+    },
+    {
+      "feature": "pay_ratio_6",
+      "stat_test": "Wasserstein distance (normed)",
+      "score": 0.0408,
+      "threshold": 0.1,
+      "drifted": false
+    },
+    {
+      "feature": "pay_ratio_mean",
+      "stat_test": "Wasserstein distance (normed)",
+      "score": 0.0854,
+      "threshold": 0.1,
+      "drifted": false
+    },
+    {
+      "feature": "delinq_max",
+      "stat_test": "Wasserstein distance (normed)",
+      "score": 0.0797,
+      "threshold": 0.1,
+      "drifted": false
+    },
+    {
+      "feature": "delinq_mean",
+      "stat_test": "Wasserstein distance (normed)",
+      "score": 0.0297,
+      "threshold": 0.1,
+      "drifted": false
+    },
+    {
+      "feature": "delinq_months",
+      "stat_test": "Wasserstein distance (normed)",
+      "score": 0.0445,
+      "threshold": 0.1,
+      "drifted": false
+    },
+    {
+      "feature": "delinq_recent",
+      "stat_test": "Jensen-Shannon distance",
+      "score": 0.0546,
+      "threshold": 0.1,
+      "drifted": false
+    },
+    {
+      "feature": "bill_trend",
+      "stat_test": "Wasserstein distance (normed)",
+      "score": 0.1175,
+      "threshold": 0.1,
+      "drifted": true
+    },
+    {
+      "feature": "pay_trend",
+      "stat_test": "Wasserstein distance (normed)",
+      "score": 0.0156,
+      "threshold": 0.1,
+      "drifted": false
+    },
+    {
+      "feature": "bill_mean",
+      "stat_test": "Wasserstein distance (normed)",
+      "score": 0.1506,
+      "threshold": 0.1,
+      "drifted": true
+    },
+    {
+      "feature": "pay_amt_mean",
+      "stat_test": "Wasserstein distance (normed)",
+      "score": 0.017,
+      "threshold": 0.1,
+      "drifted": false
+    },
+    {
+      "feature": "zero_pay_months",
+      "stat_test": "Wasserstein distance (normed)",
+      "score": 0.0087,
+      "threshold": 0.1,
+      "drifted": false
+    },
+    {
+      "feature": "score",
+      "stat_test": "Wasserstein distance (normed)",
+      "score": 0.0799,
+      "threshold": 0.1,
+      "drifted": false
+    }
+  ],
+  "psi": {
+    "probability": 0.0427,
+    "LIMIT_BAL": 0.1593,
+    "AGE": 0.7703,
+    "PAY_0": 0.0273,
+    "BILL_AMT1": 0.0484,
+    "PAY_AMT1": 0.0013,
+    "util_1": 0.4272,
+    "util_mean": 0.2926,
+    "delinq_max": 0.0382,
+    "delinq_months": 0.0206,
+    "bill_mean": 0.0203,
+    "pay_amt_mean": 0.0013
+  },
+  "psi_bands": {
+    "probability": "stable",
+    "LIMIT_BAL": "moderate",
+    "AGE": "significant",
+    "PAY_0": "stable",
+    "BILL_AMT1": "stable",
+    "PAY_AMT1": "stable",
+    "util_1": "significant",
+    "util_mean": "significant",
+    "delinq_max": "stable",
+    "delinq_months": "stable",
+    "bill_mean": "stable",
+    "pay_amt_mean": "stable"
+  },
+  "psi_reference": "reports/drift_baseline.json"
+}

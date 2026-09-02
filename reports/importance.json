@@ -1,0 +1,131 @@
+{
+  "method": "permutation_importance",
+  "scoring": "roc_auc",
+  "evaluated_on": "validation",
+  "n_repeats": 10,
+  "seed": 42,
+  "features": [
+    {
+      "feature": "delinq_max",
+      "importance_mean": 0.0419,
+      "importance_std": 0.0023
+    },
+    {
+      "feature": "PAY_0",
+      "importance_mean": 0.0229,
+      "importance_std": 0.0015
+    },
+    {
+      "feature": "PAY_AMT2",
+      "importance_mean": 0.0046,
+      "importance_std": 0.0006
+    },
+    {
+      "feature": "bill_mean",
+      "importance_mean": 0.0045,
+      "importance_std": 0.0014
+    },
+    {
+      "feature": "delinq_mean",
+      "importance_mean": 0.0038,
+      "importance_std": 0.0008
+    },
+    {
+      "feature": "pay_amt_mean",
+      "importance_mean": 0.0029,
+      "importance_std": 0.0007
+    },
+    {
+      "feature": "bill_trend",
+      "importance_mean": 0.0024,
+      "importance_std": 0.0009
+    },
+    {
+      "feature": "LIMIT_BAL",
+      "importance_mean": 0.0023,
+      "importance_std": 0.0015
+    },
+    {
+      "feature": "util_2",
+      "importance_mean": 0.0021,
+      "importance_std": 0.0012
+    },
+    {
+      "feature": "util_3",
+      "importance_mean": 0.002,
+      "importance_std": 0.0007
+    },
+    {
+      "feature": "PAY_AMT1",
+      "importance_mean": 0.0019,
+      "importance_std": 0.0007
+    },
+    {
+      "feature": "util_max",
+      "importance_mean": 0.0017,
+      "importance_std": 0.0003
+    },
+    {
+      "feature": "EDUCATION",
+      "importance_mean": 0.0016,
+      "importance_std": 0.0007
+    },
+    {
+      "feature": "zero_pay_months",
+      "importance_mean": 0.0015,
+      "importance_std": 0.0005
+    },
+    {
+      "feature": "pay_ratio_3",
+      "importance_mean": 0.0012,
+      "importance_std": 0.0005
+    }
+  ],
+  "all_features_ranked": [
+    "delinq_max",
+    "PAY_0",
+    "PAY_AMT2",
+    "bill_mean",
+    "delinq_mean",
+    "pay_amt_mean",
+    "bill_trend",
+    "LIMIT_BAL",
+    "util_2",
+    "util_3",
+    "PAY_AMT1",
+    "util_max",
+    "EDUCATION",
+    "zero_pay_months",
+    "pay_ratio_3",
+    "PAY_AMT3",
+    "pay_ratio_1",
+    "util_1",
+    "BILL_AMT2",
+    "AGE",
+    "pay_ratio_mean",
+    "pay_ratio_5",
+    "PAY_3",
+    "pay_ratio_2",
+    "BILL_AMT1",
+    "pay_ratio_6",
+    "BILL_AMT5",
+    "PAY_AMT4",
+    "pay_ratio_4",
+    "PAY_AMT6",
+    "util_5",
+    "PAY_6",
+    "PAY_2",
+    "BILL_AMT4",
+    "util_4",
+    "delinq_recent",
+    "pay_trend",
+    "BILL_AMT3",
+    "util_mean",
+    "PAY_5",
+    "util_6",
+    "delinq_months",
+    "PAY_4",
+    "PAY_AMT5",
+    "BILL_AMT6"
+  ]
+}

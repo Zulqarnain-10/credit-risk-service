@@ -1,0 +1,108 @@
+{
+  "model": "hgb",
+  "model_version": "0.1.0+412322f",
+  "trained_at": "2026-09-02T17:05:32Z",
+  "git_sha": "412322fa6f89c726eb5a14dcbd669c817d1bc220",
+  "mlflow_run_id": "864b4665479043508627044a72119946",
+  "data_sha256": "56c885f84457f6680f8438f02bfcdac9579323d8a94465ee5f26e32baa727602",
+  "n_train": 18000,
+  "n_val": 6000,
+  "n_test": 6000,
+  "n_features": 45,
+  "positive_rate_test": 0.2212,
+  "roc_auc": 0.7909,
+  "pr_auc": 0.5744,
+  "brier": 0.1316,
+  "ks": 0.4495,
+  "validation": {
+    "roc_auc": 0.7756,
+    "pr_auc": 0.5336,
+    "brier": 0.138
+  },
+  "threshold_cost_optimal": 0.155,
+  "threshold_precision_target": 0.365,
+  "precision_target_met": true,
+  "at_threshold": {
+    "threshold": 0.155,
+    "precision": 0.3667,
+    "recall": 0.7905,
+    "f1": 0.501,
+    "selection_rate": 0.4768,
+    "tn": 2861,
+    "fp": 1812,
+    "fn": 278,
+    "tp": 1049,
+    "expected_cost_per_1000": 533.6667
+  },
+  "at_precision_target": {
+    "threshold": 0.365,
+    "precision": 0.6144,
+    "recall": 0.4574,
+    "f1": 0.5244,
+    "selection_rate": 0.1647,
+    "tn": 4292,
+    "fp": 381,
+    "fn": 720,
+    "tp": 607,
+    "expected_cost_per_1000": 663.5
+  },
+  "threshold_selection": {
+    "selected_on": "validation",
+    "cost_false_negative": 5.0,
+    "cost_false_positive": 1.0,
+    "target_precision": 0.6,
+    "grid_step": 0.005,
+    "validation_precision_at_target": 0.6029
+  },
+  "calibration": {
+    "bins": 10,
+    "strategy": "quantile",
+    "mean_predicted": [
+      0.0408,
+      0.0612,
+      0.0815,
+      0.1066,
+      0.1333,
+      0.1638,
+      0.2051,
+      0.2744,
+      0.4099,
+      0.709
+    ],
+    "fraction_positive": [
+      0.0517,
+      0.06,
+      0.075,
+      0.125,
+      0.125,
+      0.1517,
+      0.1917,
+      0.2867,
+      0.4217,
+      0.7233
+    ],
+    "counts": [
+      600,
+      600,
+      600,
+      600,
+      600,
+      600,
+      600,
+      600,
+      600,
+      600
+    ],
+    "ece": 0.0109
+  },
+  "baseline_logreg": {
+    "roc_auc": 0.7672,
+    "pr_auc": 0.5219,
+    "brier": 0.1386,
+    "ks": 0.4239
+  },
+  "lift_over_baseline": {
+    "roc_auc": 0.0237,
+    "pr_auc": 0.0525
+  }
+}

@@ -1,0 +1,94 @@
+{
+  "evaluated_on": "test",
+  "n": 6000,
+  "threshold": 0.155,
+  "model_version": "0.1.0+412322f",
+  "note": "SEX and MARRIAGE are never model inputs; AGE is a model input and is reported by band to show its effect",
+  "sex": {
+    "groups": [
+      {
+        "group": "male",
+        "value": 1,
+        "n": 2372,
+        "positive_rate": 0.2411,
+        "selection_rate": 0.5,
+        "tpr": 0.7972,
+        "fpr": 0.4056,
+        "precision": 0.3845
+      },
+      {
+        "group": "female",
+        "value": 2,
+        "n": 3628,
+        "positive_rate": 0.2081,
+        "selection_rate": 0.4617,
+        "tpr": 0.7854,
+        "fpr": 0.3766,
+        "precision": 0.354
+      }
+    ],
+    "max_gap": {
+      "selection_rate": 0.0383,
+      "tpr": 0.0118,
+      "fpr": 0.029
+    },
+    "demographic_parity_ratio": 0.9234
+  },
+  "age_band": {
+    "bands": [
+      21,
+      30,
+      40,
+      50,
+      100
+    ],
+    "groups": [
+      {
+        "group": "21-29",
+        "value": "21-29",
+        "n": 1926,
+        "positive_rate": 0.2186,
+        "selection_rate": 0.5,
+        "tpr": 0.81,
+        "fpr": 0.4133,
+        "precision": 0.3541
+      },
+      {
+        "group": "30-39",
+        "value": "30-39",
+        "n": 2206,
+        "positive_rate": 0.199,
+        "selection_rate": 0.4275,
+        "tpr": 0.7722,
+        "fpr": 0.3418,
+        "precision": 0.3595
+      },
+      {
+        "group": "40-49",
+        "value": "40-49",
+        "n": 1296,
+        "positive_rate": 0.2454,
+        "selection_rate": 0.4977,
+        "tpr": 0.7893,
+        "fpr": 0.4029,
+        "precision": 0.3891
+      },
+      {
+        "group": "50-99",
+        "value": "50-99",
+        "n": 572,
+        "positive_rate": 0.2605,
+        "selection_rate": 0.542,
+        "tpr": 0.7919,
+        "fpr": 0.4539,
+        "precision": 0.3806
+      }
+    ],
+    "max_gap": {
+      "selection_rate": 0.1145,
+      "tpr": 0.0378,
+      "fpr": 0.1121
+    },
+    "demographic_parity_ratio": 0.7887
+  }
+}
