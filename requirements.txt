@@ -1,7 +1,7 @@
 # Serving dependencies only, pinned to the versions the model was trained and tested with.
 # The pipeline and dev tools live in requirements-pipeline.txt and requirements-dev.txt.
 numpy==2.5.2
-pandas==2.3.3
+pandas==3.0.5
 scipy==1.18.1
 scikit-learn==1.9.0
 joblib==1.6.0
