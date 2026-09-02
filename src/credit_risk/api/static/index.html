@@ -1,0 +1,870 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Credit risk service, live demo</title>
+  <meta name="description" content="A credit-default risk model shipped like a product: versioned data, tracked experiments, a tested FastAPI endpoint, CI/CD, and drift monitoring.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230A1628'/%3E%3Cpath d='M12 13 H44 V22.5 L25.5 41.5 H44 V51 H12 V41.5 L30.5 22.5 H12 Z' fill='%23EAF0F9'/%3E%3Ccircle cx='51.5' cy='45.5' r='5.5' fill='%23FF6B35'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@700;800&family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..700&family=IBM+Plex+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="band-dark hero">
+    <div class="wrap">
+      <div class="brand-row">
+        <p class="brand">
+          <svg class="mark" viewBox="0 0 64 64" width="28" height="28" aria-hidden="true" focusable="false">
+            <rect width="64" height="64" rx="14" fill="#0F1F38"/>
+            <path d="M12 13 H44 V22.5 L25.5 41.5 H44 V51 H12 V41.5 L30.5 22.5 H12 Z" fill="#EAF0F9"/>
+            <circle cx="51.5" cy="45.5" r="5.5" fill="#FF6B35"/>
+          </svg>
+          <span class="wordmark">Syed Zulqarnain Hassan<span class="dot">.</span></span>
+        </p>
+        <a class="repo-link" href="https://github.com/Zulqarnain-10/credit-risk-service">GitHub &#8599;</a>
+      </div>
+      <p class="eyebrow">
+        <span class="livedot" aria-hidden="true"></span>
+        <span>Live model</span>
+        <span aria-hidden="true">&middot;</span>
+        <span class="ver" id="slot-version"><span class="todo">[todo]</span></span>
+      </p>
+      <h1>A credit-default risk model, <em>shipped like a product.</em></h1>
+      <p class="lede">Enter six months of statements and repayment history for a cardholder; the model returns the probability of default next month and a decision at a threshold chosen on validation data.</p>
+      <p class="lede disclaimer" id="slot-disclaimer">Demonstration system trained on the 2005 Taiwan credit-card dataset (UCI id 350). Not a U.S. underwriting model. Do not use it for real credit decisions.</p>
+    </div>
+  </header>
+
+  <main id="main">
+
+    <section class="section receipts" aria-labelledby="receipts-title">
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="kicker">Receipts</span>
+          <h2 id="receipts-title">Measured on the held-out <em>split.</em></h2>
+          <p>Every number on this page is read from a file the pipeline wrote; nothing is typed by hand. Each tile links to that file.</p>
+          <p class="receipt-note">Test split, n = <span id="slot-ntest"><span class="todo">[todo]</span></span></p>
+        </div>
+        <ul class="tiles">
+          <li class="panel tile" data-tile="roc_auc">
+            <span class="kicker">Measured</span>
+            <span class="tile-v" id="slot-roc_auc"><span class="todo">[todo]</span></span>
+            <span class="tile-l">ROC-AUC</span>
+            <span class="tile-s">Ranking quality, higher is better</span>
+            <span class="tile-src"><a href="https://github.com/Zulqarnain-10/credit-risk-service/blob/main/reports/metrics.json">reports/metrics.json</a></span>
+          </li>
+          <li class="panel tile" data-tile="pr_auc">
+            <span class="kicker">Measured</span>
+            <span class="tile-v" id="slot-pr_auc"><span class="todo">[todo]</span></span>
+            <span class="tile-l">PR-AUC</span>
+            <span class="tile-s">Average precision, higher is better</span>
+            <span class="tile-src"><a href="https://github.com/Zulqarnain-10/credit-risk-service/blob/main/reports/metrics.json">reports/metrics.json</a></span>
+          </li>
+          <li class="panel tile" data-tile="brier">
+            <span class="kicker">Measured</span>
+            <span class="tile-v" id="slot-brier"><span class="todo">[todo]</span></span>
+            <span class="tile-l">Brier score</span>
+            <span class="tile-s">Calibration, lower is better</span>
+            <span class="tile-src"><a href="https://github.com/Zulqarnain-10/credit-risk-service/blob/main/reports/metrics.json">reports/metrics.json</a></span>
+          </li>
+          <li class="panel tile" data-tile="trained">
+            <span class="kicker">Measured</span>
+            <span class="tile-v" id="slot-trained"><span class="todo">[todo]</span></span>
+            <span class="tile-l">Trained</span>
+            <span class="tile-s">UTC date of the run that produced the shipped model</span>
+            <span class="tile-src"><a href="https://github.com/Zulqarnain-10/credit-risk-service/blob/main/reports/metrics.json">reports/metrics.json</a></span>
+          </li>
+          <li class="panel tile" data-tile="latency">
+            <span class="kicker">Measured</span>
+            <span class="tile-v" id="slot-latency"><span class="todo">[todo]</span></span>
+            <span class="tile-l">p95 latency</span>
+            <span class="tile-s" id="slot-host">POST /predict, host not recorded yet</span>
+            <span class="tile-src"><a href="https://github.com/Zulqarnain-10/credit-risk-service/blob/main/reports/loadtest.json">reports/loadtest.json</a></span>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="try-title">
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="kicker">Try it</span>
+          <h2 id="try-title">Score an <em>applicant.</em></h2>
+          <p>Three real applicants from the held-out split are preloaded. Change any field and submit; the API validates every value and returns a probability.</p>
+        </div>
+
+        <div class="try-grid">
+          <div>
+            <div class="presets" role="group" aria-label="Presets" id="presets">
+              <span class="mono">Presets load from the API: <span class="todo">[todo]</span></span>
+            </div>
+            <p class="preset-desc" id="preset-desc"></p>
+
+            <form class="panel applicant" id="applicant" novalidate>
+              <fieldset>
+                <legend>Account</legend>
+                <p class="hint" id="hint-account">Credit limit is the line of credit in NT dollars, including family supplementary credit. Education uses the dataset codes: 1 graduate school, 2 university, 3 high school, 4 other.</p>
+                <div class="fields">
+                  <div class="field">
+                    <label for="f-limit_bal">Credit limit <span class="fid">LIMIT_BAL</span></label>
+                    <div class="control">
+                      <input class="has-unit" id="f-limit_bal" name="limit_bal" type="number" inputmode="decimal" step="any" min="1" max="2000000" aria-describedby="hint-account" required>
+                      <span class="unit" aria-hidden="true">NT$</span>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <label for="f-education">Education <span class="fid">EDUCATION</span></label>
+                    <div class="control">
+                      <select id="f-education" name="education" aria-describedby="hint-account" required>
+                        <option value="1">1, graduate school</option>
+                        <option value="2">2, university</option>
+                        <option value="3">3, high school</option>
+                        <option value="4">4, other</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <label for="f-age">Age <span class="fid">AGE</span></label>
+                    <div class="control">
+                      <input class="has-unit" id="f-age" name="age" type="number" inputmode="numeric" step="1" min="18" max="100" aria-describedby="hint-account" required>
+                      <span class="unit" aria-hidden="true">years</span>
+                    </div>
+                  </div>
+                </div>
+              </fieldset>
+
+              <fieldset>
+                <legend>Repayment status</legend>
+                <p class="hint" id="hint-pay">One code per statement for the last six months. <code>-2</code> no consumption, <code>-1</code> paid in full, <code>0</code> revolving credit, <code>1</code> to <code>8</code> months of delayed payment.</p>
+                <div class="fields">
+                  <div class="field">
+                    <label for="f-pay_0">Most recent month <span class="fid">PAY_0</span></label>
+                    <div class="control"><input id="f-pay_0" name="pay_0" type="number" inputmode="numeric" step="1" min="-2" max="9" aria-describedby="hint-pay" required></div>
+                  </div>
+                  <div class="field">
+                    <label for="f-pay_2">1 month back <span class="fid">PAY_2</span></label>
+                    <div class="control"><input id="f-pay_2" name="pay_2" type="number" inputmode="numeric" step="1" min="-2" max="9" aria-describedby="hint-pay" required></div>
+                  </div>
+                  <div class="field">
+                    <label for="f-pay_3">2 months back <span class="fid">PAY_3</span></label>
+                    <div class="control"><input id="f-pay_3" name="pay_3" type="number" inputmode="numeric" step="1" min="-2" max="9" aria-describedby="hint-pay" required></div>
+                  </div>
+                  <div class="field">
+                    <label for="f-pay_4">3 months back <span class="fid">PAY_4</span></label>
+                    <div class="control"><input id="f-pay_4" name="pay_4" type="number" inputmode="numeric" step="1" min="-2" max="9" aria-describedby="hint-pay" required></div>
+                  </div>
+                  <div class="field">
+                    <label for="f-pay_5">4 months back <span class="fid">PAY_5</span></label>
+                    <div class="control"><input id="f-pay_5" name="pay_5" type="number" inputmode="numeric" step="1" min="-2" max="9" aria-describedby="hint-pay" required></div>
+                  </div>
+                  <div class="field">
+                    <label for="f-pay_6">5 months back <span class="fid">PAY_6</span></label>
+                    <div class="control"><input id="f-pay_6" name="pay_6" type="number" inputmode="numeric" step="1" min="-2" max="9" aria-describedby="hint-pay" required></div>
+                  </div>
+                </div>
+              </fieldset>
+
+              <fieldset>
+                <legend>Bill amounts</legend>
+                <p class="hint" id="hint-bill">Statement balance in NT dollars for each of the last six months. A negative value is a credit balance.</p>
+                <div class="fields">
+                  <div class="field">
+                    <label for="f-bill_amt1">Most recent month <span class="fid">BILL_AMT1</span></label>
+                    <div class="control">
+                      <input class="has-unit" id="f-bill_amt1" name="bill_amt1" type="number" inputmode="decimal" step="any" min="-2000000" max="2000000" aria-describedby="hint-bill" required>
+                      <span class="unit" aria-hidden="true">NT$</span>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <label for="f-bill_amt2">1 month back <span class="fid">BILL_AMT2</span></label>
+                    <div class="control">
+                      <input class="has-unit" id="f-bill_amt2" name="bill_amt2" type="number" inputmode="decimal" step="any" min="-2000000" max="2000000" aria-describedby="hint-bill" required>
+                      <span class="unit" aria-hidden="true">NT$</span>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <label for="f-bill_amt3">2 months back <span class="fid">BILL_AMT3</span></label>
+                    <div class="control">
+                      <input class="has-unit" id="f-bill_amt3" name="bill_amt3" type="number" inputmode="decimal" step="any" min="-2000000" max="2000000" aria-describedby="hint-bill" required>
+                      <span class="unit" aria-hidden="true">NT$</span>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <label for="f-bill_amt4">3 months back <span class="fid">BILL_AMT4</span></label>
+                    <div class="control">
+                      <input class="has-unit" id="f-bill_amt4" name="bill_amt4" type="number" inputmode="decimal" step="any" min="-2000000" max="2000000" aria-describedby="hint-bill" required>
+                      <span class="unit" aria-hidden="true">NT$</span>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <label for="f-bill_amt5">4 months back <span class="fid">BILL_AMT5</span></label>
+                    <div class="control">
+                      <input class="has-unit" id="f-bill_amt5" name="bill_amt5" type="number" inputmode="decimal" step="any" min="-2000000" max="2000000" aria-describedby="hint-bill" required>
+                      <span class="unit" aria-hidden="true">NT$</span>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <label for="f-bill_amt6">5 months back <span class="fid">BILL_AMT6</span></label>
+                    <div class="control">
+                      <input class="has-unit" id="f-bill_amt6" name="bill_amt6" type="number" inputmode="decimal" step="any" min="-2000000" max="2000000" aria-describedby="hint-bill" required>
+                      <span class="unit" aria-hidden="true">NT$</span>
+                    </div>
+                  </div>
+                </div>
+              </fieldset>
+
+              <fieldset>
+                <legend>Payment amounts</legend>
+                <p class="hint" id="hint-payamt">Amount paid in NT dollars toward the previous statement, for each of the last six months. Zero means no payment was made that month.</p>
+                <div class="fields">
+                  <div class="field">
+                    <label for="f-pay_amt1">Most recent month <span class="fid">PAY_AMT1</span></label>
+                    <div class="control">
+                      <input class="has-unit" id="f-pay_amt1" name="pay_amt1" type="number" inputmode="decimal" step="any" min="0" max="2000000" aria-describedby="hint-payamt" required>
+                      <span class="unit" aria-hidden="true">NT$</span>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <label for="f-pay_amt2">1 month back <span class="fid">PAY_AMT2</span></label>
+                    <div class="control">
+                      <input class="has-unit" id="f-pay_amt2" name="pay_amt2" type="number" inputmode="decimal" step="any" min="0" max="2000000" aria-describedby="hint-payamt" required>
+                      <span class="unit" aria-hidden="true">NT$</span>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <label for="f-pay_amt3">2 months back <span class="fid">PAY_AMT3</span></label>
+                    <div class="control">
+                      <input class="has-unit" id="f-pay_amt3" name="pay_amt3" type="number" inputmode="decimal" step="any" min="0" max="2000000" aria-describedby="hint-payamt" required>
+                      <span class="unit" aria-hidden="true">NT$</span>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <label for="f-pay_amt4">3 months back <span class="fid">PAY_AMT4</span></label>
+                    <div class="control">
+                      <input class="has-unit" id="f-pay_amt4" name="pay_amt4" type="number" inputmode="decimal" step="any" min="0" max="2000000" aria-describedby="hint-payamt" required>
+                      <span class="unit" aria-hidden="true">NT$</span>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <label for="f-pay_amt5">4 months back <span class="fid">PAY_AMT5</span></label>
+                    <div class="control">
+                      <input class="has-unit" id="f-pay_amt5" name="pay_amt5" type="number" inputmode="decimal" step="any" min="0" max="2000000" aria-describedby="hint-payamt" required>
+                      <span class="unit" aria-hidden="true">NT$</span>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <label for="f-pay_amt6">5 months back <span class="fid">PAY_AMT6</span></label>
+                    <div class="control">
+                      <input class="has-unit" id="f-pay_amt6" name="pay_amt6" type="number" inputmode="decimal" step="any" min="0" max="2000000" aria-describedby="hint-payamt" required>
+                      <span class="unit" aria-hidden="true">NT$</span>
+                    </div>
+                  </div>
+                </div>
+              </fieldset>
+
+              <div class="form-actions">
+                <button class="btn btn-primary" type="submit" id="submit">Score this applicant</button>
+                <span class="mono">POST /predict</span>
+              </div>
+            </form>
+          </div>
+
+          <aside class="panel result" aria-live="polite" aria-labelledby="result-title">
+            <span class="kicker" id="result-title">Result</span>
+            <p class="result-empty" id="result-empty">No score yet. Submit the form to get the probability of default next month, the decision at threshold <span id="slot-threshold"><span class="todo">[todo]</span></span>, and the model version.</p>
+            <div class="result-error" id="result-error" hidden>
+              <h3 id="result-error-title"></h3>
+              <ul id="result-error-list"></ul>
+              <p id="result-error-text"></p>
+            </div>
+            <div class="result-body fade" id="result-body" hidden>
+              <p class="result-metric" id="r-prob"></p>
+              <span class="result-metric-l">Probability of default next month</span>
+              <p class="result-decision" id="r-decision"></p>
+              <dl class="result-meta">
+                <dt>Threshold</dt>
+                <dd id="r-threshold"></dd>
+                <dt>Model</dt>
+                <dd id="r-model"></dd>
+                <dt>Version</dt>
+                <dd id="r-version"></dd>
+              </dl>
+              <p class="result-disclaimer" id="r-disclaimer"></p>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="drivers-title">
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="kicker">Drivers</span>
+          <h2 id="drivers-title">Top global <em>drivers.</em></h2>
+          <p>How much ROC-AUC drops when one feature is shuffled and the rest are left alone. Larger bars matter more to the model overall; this is not an explanation of a single prediction.</p>
+        </div>
+        <div class="panel">
+          <ol class="drivers" id="drivers" hidden></ol>
+          <p class="drivers drivers-empty" id="drivers-empty">Loads from <a href="https://github.com/Zulqarnain-10/credit-risk-service/blob/main/reports/importance.json">reports/importance.json</a> through the API. <span class="todo">[todo]</span></p>
+        </div>
+        <p class="method-note">Permutation importance on the validation split. <span id="slot-imp-detail"><span class="todo">[todo]</span></span></p>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="run-title">
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="kicker">Run it yourself</span>
+          <h2 id="run-title">Same service, <em>one command.</em></h2>
+          <p>The image on GHCR contains the model, its version and metric receipts, the presets, and this page. The curl example posts the first preset above, so the payload is a real held-out applicant.</p>
+        </div>
+        <div class="run-grid">
+          <div class="code-block">
+            <span class="kicker">Docker</span>
+            <button class="btn btn-copy" type="button" data-copy="code-docker" aria-label="Copy the docker run command">Copy</button>
+            <pre id="code-docker"><code>docker run -p 8000:8000 ghcr.io/zulqarnain-10/credit-risk-service:latest</code></pre>
+          </div>
+          <div class="code-block">
+            <span class="kicker">Curl, first preset</span>
+            <button class="btn btn-copy" type="button" data-copy="code-curl" aria-label="Copy the curl command">Copy</button>
+            <pre id="code-curl"><code>curl -X POST http://127.0.0.1:8000/predict -H "Content-Type: application/json" -d '<span class="todo">[todo]</span>'</code></pre>
+          </div>
+        </div>
+        <p class="run-links">Then open <a href="/docs">/docs</a> for the OpenAPI schema, <a href="/version">/version</a> for the receipts as JSON, and <a href="/metrics">/metrics</a> for Prometheus.</p>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="band-dark foot">
+    <div class="wrap">
+      <p class="foot-name">
+        <svg class="mark" viewBox="0 0 64 64" width="28" height="28" aria-hidden="true" focusable="false">
+          <rect width="64" height="64" rx="14" fill="#0F1F38"/>
+          <path d="M12 13 H44 V22.5 L25.5 41.5 H44 V51 H12 V41.5 L30.5 22.5 H12 Z" fill="#EAF0F9"/>
+          <circle cx="51.5" cy="45.5" r="5.5" fill="#FF6B35"/>
+        </svg>
+        <span class="wordmark">Syed Zulqarnain Hassan<span class="dot">.</span></span>
+      </p>
+      <p class="foot-role">Data Scientist &amp; AI/ML Engineer</p>
+      <ul class="foot-links">
+        <li><a href="https://github.com/Zulqarnain-10/credit-risk-service">GitHub repo</a></li>
+        <li><a href="https://zulqarnainhassan.com">zulqarnainhassan.com</a></li>
+        <li><a href="https://www.linkedin.com/in/syedzulqarnainh">LinkedIn</a></li>
+      </ul>
+      <ul class="foot-links foot-cards">
+        <li><a href="https://github.com/Zulqarnain-10/credit-risk-service/blob/main/models/MODEL_CARD.md">Model card</a></li>
+        <li><a href="https://github.com/Zulqarnain-10/credit-risk-service/blob/main/data/DATA_CARD.md">Data card</a></li>
+      </ul>
+      <p class="foot-note">Source data: UCI Machine Learning Repository, CC BY 4.0. The data card carries the citation and the file hashes. Protected attributes are never model inputs.</p>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      'use strict';
+
+      var API_ONLINE = location.protocol === 'http:' || location.protocol === 'https:';
+      var LOCAL_BASE = 'http://127.0.0.1:8000';
+      var REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      /* Human names for every id in settings.MODEL_FEATURE_COLUMNS. */
+      var FEATURE_NAMES = {
+        LIMIT_BAL: 'Credit limit',
+        EDUCATION: 'Education level',
+        AGE: 'Age',
+        PAY_0: 'Most recent repayment status',
+        PAY_2: 'Repayment status, 1 month back',
+        PAY_3: 'Repayment status, 2 months back',
+        PAY_4: 'Repayment status, 3 months back',
+        PAY_5: 'Repayment status, 4 months back',
+        PAY_6: 'Repayment status, 5 months back',
+        BILL_AMT1: 'Most recent bill amount',
+        BILL_AMT2: 'Bill amount, 1 month back',
+        BILL_AMT3: 'Bill amount, 2 months back',
+        BILL_AMT4: 'Bill amount, 3 months back',
+        BILL_AMT5: 'Bill amount, 4 months back',
+        BILL_AMT6: 'Bill amount, 5 months back',
+        PAY_AMT1: 'Most recent payment amount',
+        PAY_AMT2: 'Payment amount, 1 month back',
+        PAY_AMT3: 'Payment amount, 2 months back',
+        PAY_AMT4: 'Payment amount, 3 months back',
+        PAY_AMT5: 'Payment amount, 4 months back',
+        PAY_AMT6: 'Payment amount, 5 months back',
+        util_1: 'Credit utilization, most recent month',
+        util_2: 'Credit utilization, 1 month back',
+        util_3: 'Credit utilization, 2 months back',
+        util_4: 'Credit utilization, 3 months back',
+        util_5: 'Credit utilization, 4 months back',
+        util_6: 'Credit utilization, 5 months back',
+        util_mean: 'Mean credit utilization',
+        util_max: 'Peak credit utilization',
+        pay_ratio_1: 'Payment-to-bill ratio, most recent month',
+        pay_ratio_2: 'Payment-to-bill ratio, 1 month back',
+        pay_ratio_3: 'Payment-to-bill ratio, 2 months back',
+        pay_ratio_4: 'Payment-to-bill ratio, 3 months back',
+        pay_ratio_5: 'Payment-to-bill ratio, 4 months back',
+        pay_ratio_6: 'Payment-to-bill ratio, 5 months back',
+        pay_ratio_mean: 'Mean payment-to-bill ratio',
+        delinq_max: 'Longest delinquency',
+        delinq_mean: 'Mean delinquency status',
+        delinq_months: 'Months delinquent',
+        delinq_recent: 'Delinquent in the most recent month',
+        bill_trend: 'Bill trend, latest minus oldest',
+        pay_trend: 'Payment trend, latest minus oldest',
+        bill_mean: 'Mean bill amount',
+        pay_amt_mean: 'Mean payment amount',
+        zero_pay_months: 'Months with no payment'
+      };
+
+      var MODEL_NAMES = {
+        hgb: 'Gradient boosting (hgb)',
+        logreg: 'Logistic regression (logreg)'
+      };
+
+      function $(id) {
+        return document.getElementById(id);
+      }
+
+      function chip() {
+        var s = document.createElement('span');
+        s.className = 'todo';
+        s.textContent = '[todo]';
+        return s;
+      }
+
+      function setText(id, text) {
+        var el = $(id);
+        if (el) el.textContent = text;
+      }
+
+      function setChip(id) {
+        var el = $(id);
+        if (el) el.replaceChildren(chip());
+      }
+
+      function isNum(v) {
+        return typeof v === 'number' && isFinite(v);
+      }
+
+      function fmt(v, dp) {
+        return isNum(v) ? v.toFixed(dp) : null;
+      }
+
+      function fmtThreshold(v) {
+        return isNum(v) ? String(Number(v.toFixed(4))) : null;
+      }
+
+      function fmtDate(iso) {
+        if (!iso) return null;
+        var d = new Date(iso);
+        if (isNaN(d.getTime())) return null;
+        var m = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        return m[d.getUTCMonth()] + ' ' + d.getUTCDate() + ', ' + d.getUTCFullYear();
+      }
+
+      function fieldLabel(name) {
+        var fid = String(name).toUpperCase();
+        var human = FEATURE_NAMES[fid];
+        return human ? human + ' (' + fid + ')' : String(name);
+      }
+
+      function getJSON(path) {
+        return fetch(path, { headers: { Accept: 'application/json' } }).then(function (r) {
+          if (!r.ok) throw new Error(path + ' returned ' + r.status);
+          return r.json();
+        });
+      }
+
+      /* Receipts */
+
+      function markUnmeasured(key) {
+        var tile = document.querySelector('[data-tile="' + key + '"]');
+        if (!tile) return;
+        var k = tile.querySelector('.kicker');
+        if (k) k.textContent = 'Unmeasured';
+        setChip('slot-' + key);
+      }
+
+      function fillTile(key, text) {
+        if (text === null || text === undefined) {
+          markUnmeasured(key);
+          return;
+        }
+        setText('slot-' + key, text);
+      }
+
+      function allUnmeasured() {
+        ['roc_auc', 'pr_auc', 'brier', 'trained', 'latency'].forEach(markUnmeasured);
+      }
+
+      function loadVersion() {
+        return getJSON('/version').then(function (v) {
+          var m = v.metrics || {};
+          fillTile('roc_auc', fmt(m.roc_auc, 4));
+          fillTile('pr_auc', fmt(m.pr_auc, 4));
+          fillTile('brier', fmt(m.brier, 4));
+          fillTile('trained', fmtDate(v.trained_at || m.trained_at));
+          var lt = v.loadtest;
+          if (lt && isNum(lt.p95_ms)) {
+            fillTile('latency', fmt(lt.p95_ms, 2) + ' ms');
+            setText('slot-host', 'POST /predict on ' + (lt.host || 'an unrecorded host'));
+          } else {
+            markUnmeasured('latency');
+          }
+          if (v.model_version) setText('slot-version', 'v' + v.model_version);
+          if (v.disclaimer) setText('slot-disclaimer', v.disclaimer);
+          if (isNum(m.n_test)) setText('slot-ntest', m.n_test.toLocaleString('en-US'));
+          var t = fmtThreshold(m.threshold_cost_optimal);
+          if (t !== null) setText('slot-threshold', t);
+        }).catch(allUnmeasured);
+      }
+
+      /* Presets and form */
+
+      var form = $('applicant');
+      var presets = [];
+
+      function describedBy(el) {
+        return (el.getAttribute('aria-describedby') || '').split(/\s+/).filter(Boolean);
+      }
+
+      /* Reset the fields the last 422 marked: the invalid flag and the error id in aria-describedby. */
+      function clearInvalid() {
+        Array.prototype.forEach.call(form.querySelectorAll('[aria-invalid]'), function (el) {
+          el.removeAttribute('aria-invalid');
+          var ids = describedBy(el).filter(function (id) { return id.indexOf('err-') !== 0; });
+          if (ids.length) el.setAttribute('aria-describedby', ids.join(' ')); else el.removeAttribute('aria-describedby');
+        });
+      }
+
+      function applyPreset(index) {
+        var p = presets[index];
+        if (!p) return;
+        var input = p.input || {};
+        Object.keys(input).forEach(function (k) {
+          var el = form.elements[k];
+          if (el) el.value = input[k];
+        });
+        clearInvalid();
+        Array.prototype.forEach.call($('presets').querySelectorAll('button'), function (b, i) {
+          b.setAttribute('aria-pressed', i === index ? 'true' : 'false');
+        });
+        var desc = $('preset-desc');
+        desc.replaceChildren();
+        desc.appendChild(document.createTextNode((p.description || p.label || '') + ' '));
+        var meta = document.createElement('span');
+        meta.className = 'mono';
+        var bits = [];
+        if (p.source_row_id !== undefined) bits.push('Row ID ' + p.source_row_id);
+        if (isNum(p.model_probability)) bits.push('model probability ' + (p.model_probability * 100).toFixed(2) + '%');
+        meta.textContent = bits.join(', ');
+        desc.appendChild(meta);
+      }
+
+      function buildPresetButtons() {
+        var box = $('presets');
+        box.replaceChildren();
+        presets.forEach(function (p, i) {
+          var b = document.createElement('button');
+          b.type = 'button';
+          b.className = 'btn';
+          b.textContent = p.label || ('Preset ' + (i + 1));
+          b.setAttribute('aria-pressed', 'false');
+          b.addEventListener('click', function () {
+            applyPreset(i);
+          });
+          box.appendChild(b);
+        });
+      }
+
+      function buildCurl(input) {
+        var base = API_ONLINE ? location.origin : LOCAL_BASE;
+        var body = JSON.stringify(input);
+        var pre = $('code-curl');
+        pre.replaceChildren();
+        var code = document.createElement('code');
+        code.textContent = 'curl -X POST ' + base + '/predict -H "Content-Type: application/json" -d \'' + body + '\'';
+        pre.appendChild(code);
+      }
+
+      function presetsUnavailable() {
+        var box = $('presets');
+        box.replaceChildren();
+        var s = document.createElement('span');
+        s.className = 'mono';
+        s.appendChild(document.createTextNode('Presets need the API: '));
+        s.appendChild(chip());
+        box.appendChild(s);
+      }
+
+      function loadPresets() {
+        return getJSON('/presets').then(function (data) {
+          presets = Array.isArray(data.presets) ? data.presets : [];
+          if (!presets.length) {
+            presetsUnavailable();
+            return;
+          }
+          buildPresetButtons();
+          applyPreset(0);
+          buildCurl(presets[0].input || {});
+        }).catch(presetsUnavailable);
+      }
+
+      function readForm() {
+        var out = {};
+        Array.prototype.forEach.call(form.querySelectorAll('input[name], select[name]'), function (el) {
+          var raw = el.value.trim();
+          if (raw === '') {
+            out[el.name] = null;
+            return;
+          }
+          var n = Number(raw);
+          out[el.name] = isNaN(n) ? raw : n;
+        });
+        return out;
+      }
+
+      /* Result card */
+
+      var firstResult = true;
+
+      function showState(which) {
+        $('result-empty').hidden = which !== 'empty';
+        $('result-error').hidden = which !== 'error';
+        var body = $('result-body');
+        body.hidden = which !== 'result';
+        if (which === 'result' && firstResult) {
+          firstResult = false;
+          if (REDUCED) {
+            body.classList.add('in');
+          } else {
+            requestAnimationFrame(function () {
+              requestAnimationFrame(function () {
+                body.classList.add('in');
+              });
+            });
+          }
+        }
+        if (which !== 'empty' && window.innerWidth <= 1000) {
+          document.querySelector('.result').scrollIntoView({
+            behavior: REDUCED ? 'auto' : 'smooth',
+            block: 'start'
+          });
+        }
+      }
+
+      function showError(title, text, items) {
+        setText('result-error-title', title);
+        setText('result-error-text', text || '');
+        var list = $('result-error-list');
+        list.replaceChildren();
+        (items || []).forEach(function (item) {
+          var li = document.createElement('li');
+          if (typeof item === 'string') {
+            li.textContent = item;
+          } else {
+            if (item.id) li.id = item.id;
+            li.textContent = item.text;
+          }
+          list.appendChild(li);
+        });
+        list.hidden = !(items && items.length);
+        showState('error');
+      }
+
+      function lowerFirst(s) {
+        return s ? s.charAt(0).toLowerCase() + s.slice(1) : '';
+      }
+
+      function showValidation(detail) {
+        clearInvalid();
+        var items = [];
+        var firstBad = null;
+        var seen = {};
+        if (Array.isArray(detail)) {
+          detail.forEach(function (d) {
+            var loc = Array.isArray(d.loc) ? d.loc.filter(function (x) { return x !== 'body'; }) : [];
+            var name = loc.length ? String(loc[loc.length - 1]) : '';
+            var el = name ? form.elements[name] : null;
+            var label = name ? fieldLabel(name) : 'Request';
+            var msg = d.type === 'extra_forbidden' ? 'this field is not part of the schema' : lowerFirst(d.msg || 'invalid value');
+            /* One id per message (err-age, err-age-2, ...) so the field can name its own reason. */
+            var base = 'err-' + (name ? name.replace(/[^A-Za-z0-9_-]/g, '_') : 'request');
+            seen[base] = (seen[base] || 0) + 1;
+            var id = seen[base] === 1 ? base : base + '-' + seen[base];
+            items.push({ id: id, text: label + ': ' + msg });
+            if (el && el.setAttribute) {
+              el.setAttribute('aria-invalid', 'true');
+              el.setAttribute('aria-describedby', describedBy(el).concat([id]).join(' '));
+              if (!firstBad) firstBad = el;
+            }
+          });
+        } else if (detail) {
+          items.push(typeof detail === 'string' ? detail : JSON.stringify(detail));
+        }
+        var n = items.length;
+        showError(
+          'The API rejected ' + n + (n === 1 ? ' field' : ' fields'),
+          'Fix the values below and submit again. Ranges mirror the data card.',
+          items
+        );
+        if (firstBad) firstBad.focus();
+      }
+
+      function showResult(data) {
+        clearInvalid();
+        var pct = isNum(data.probability) ? (data.probability * 100).toFixed(2) + '%' : null;
+        var prob = $('r-prob');
+        if (pct === null) prob.replaceChildren(chip()); else prob.textContent = pct;
+        setText('r-decision', data.decision_label || data.decision || '');
+        var t = fmtThreshold(data.threshold);
+        if (t === null) setChip('r-threshold'); else setText('r-threshold', t);
+        setText('r-model', MODEL_NAMES[data.model] || data.model || '');
+        if (data.model_version) setText('r-version', data.model_version); else setChip('r-version');
+        setText('r-disclaimer', data.disclaimer || '');
+        showState('result');
+      }
+
+      form.addEventListener('submit', function (ev) {
+        ev.preventDefault();
+        if (!API_ONLINE) {
+          showError(
+            'No API behind this page',
+            'Open it through the service (python -m credit_risk.api, or the docker run line below) to score an applicant.'
+          );
+          return;
+        }
+        var btn = $('submit');
+        btn.disabled = true;
+        fetch('/predict', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify(readForm())
+        }).then(function (r) {
+          if (r.status === 422) {
+            return r.json().then(function (d) { showValidation(d.detail); });
+          }
+          if (!r.ok) {
+            showError('The API returned status ' + r.status, 'Check the service logs and try again.');
+            return;
+          }
+          return r.json().then(showResult);
+        }).catch(function () {
+          showError('Could not reach the API', 'The request did not complete. Check that the service is running and try again.');
+        }).then(function () {
+          btn.disabled = false;
+        });
+      });
+
+      /* Drivers */
+
+      function loadImportance() {
+        return getJSON('/importance').then(function (data) {
+          var feats = Array.isArray(data.features) ? data.features.slice(0, 8) : [];
+          if (!feats.length) return;
+          var max = 0;
+          feats.forEach(function (f) {
+            if (isNum(f.importance_mean) && f.importance_mean > max) max = f.importance_mean;
+          });
+          var list = $('drivers');
+          list.replaceChildren();
+          feats.forEach(function (f) {
+            var li = document.createElement('li');
+            li.className = 'driver';
+            var name = document.createElement('span');
+            name.className = 'driver-name';
+            name.textContent = FEATURE_NAMES[f.feature] || f.feature;
+            name.appendChild(document.createTextNode(' '));
+            var fid = document.createElement('span');
+            fid.className = 'fid';
+            fid.textContent = f.feature;
+            name.appendChild(fid);
+            var val = document.createElement('span');
+            val.className = 'driver-v';
+            val.textContent = isNum(f.importance_mean) ? f.importance_mean.toFixed(4) : '';
+            var bar = document.createElement('div');
+            bar.className = 'bar';
+            bar.setAttribute('aria-hidden', 'true');
+            var fill = document.createElement('span');
+            var w = max > 0 && isNum(f.importance_mean) ? Math.max(0, f.importance_mean / max) * 100 : 0;
+            fill.style.width = w.toFixed(1) + '%';
+            bar.appendChild(fill);
+            li.appendChild(name);
+            li.appendChild(val);
+            li.appendChild(bar);
+            list.appendChild(li);
+          });
+          list.hidden = false;
+          $('drivers-empty').hidden = true;
+          var bits = [];
+          if (data.scoring) bits.push('Scoring ' + data.scoring);
+          if (isNum(data.n_repeats)) bits.push(data.n_repeats + ' repeats');
+          if (isNum(data.seed)) bits.push('seed ' + data.seed);
+          if (bits.length) setText('slot-imp-detail', bits.join(', ') + '.');
+        }).catch(function () {});
+      }
+
+      /* Copy buttons */
+
+      function legacyCopy(text) {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.setAttribute('readonly', '');
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        var ok = false;
+        try {
+          ok = document.execCommand('copy');
+        } catch (e) {
+          ok = false;
+        }
+        document.body.removeChild(ta);
+        return ok;
+      }
+
+      function flash(btn) {
+        var label = btn.textContent;
+        btn.textContent = 'Copied';
+        setTimeout(function () {
+          btn.textContent = label;
+        }, 1500);
+      }
+
+      Array.prototype.forEach.call(document.querySelectorAll('.btn-copy'), function (btn) {
+        btn.addEventListener('click', function () {
+          var pre = $(btn.getAttribute('data-copy'));
+          if (!pre) return;
+          var text = pre.textContent;
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(function () {
+              flash(btn);
+            }).catch(function () {
+              if (legacyCopy(text)) flash(btn);
+            });
+          } else if (legacyCopy(text)) {
+            flash(btn);
+          }
+        });
+      });
+
+      /* Boot */
+
+      if (API_ONLINE) {
+        loadVersion();
+        loadPresets();
+        loadImportance();
+      } else {
+        allUnmeasured();
+        presetsUnavailable();
+      }
+    })();
+  </script>
+</body>
+</html>
