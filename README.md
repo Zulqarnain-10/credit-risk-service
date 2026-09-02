@@ -20,8 +20,10 @@ prediction the API returns.
 
 ## Live demo and one-command run
 
-Live endpoint: [todo: live URL after first deploy]. The demo runs on a free Hugging Face Space;
-free Spaces sleep after a period of inactivity and take a few seconds to wake.
+Live endpoint: [todo: live URL after first deploy]. The Deploy workflow targets a Hugging Face
+Space (Docker SDK); Docker Spaces now sit behind a paid Hugging Face plan, so the first deploy
+waits on a hosting decision, with a Render free service (`render.yaml`) as the fallback. Either
+host sleeps after a period of inactivity and takes a few seconds to wake.
 
 Run the same service on your machine with one command:
 
@@ -137,7 +139,7 @@ pandera for the raw-data schema, DVC for the pipeline, MLflow for experiment tra
 model registry, FastAPI with pydantic v2 and uvicorn for serving, prometheus-fastapi-instrumentator
 for `/metrics`, Evidently for the drift report, pytest and ruff, pre-commit with gitleaks, a
 multi-stage non-root Docker image on `python:3.12-slim`, GitHub Actions for CI and CD, GHCR for
-the image, Hugging Face Spaces for the live endpoint. Exact serving versions are pinned in
+the image, a Hugging Face Space (or a Render service) for the live endpoint. Exact serving versions are pinned in
 [requirements.txt](requirements.txt); pipeline and dev extras in the two files next to it.
 
 ## Run it locally
@@ -210,7 +212,7 @@ scrape_configs:
 ```
 
 Every prediction is appended as one JSON line to `PREDICTION_LOG_PATH` (default: a file in the
-system temp directory). On a free Space that file is ephemeral and disappears when the Space
+system temp directory). On a free host that file is ephemeral and disappears when the service
 restarts; treat it as a demonstration of the mechanism, not as storage.
 
 Drift has two tools. `python -m credit_risk.monitoring drift` builds an Evidently report with the
