@@ -1,0 +1,134 @@
+name: Deploy
+
+# Runs after CI succeeds for a push to main, on version tags, and on demand.
+# Pushes the image to GHCR, then deploys the Hugging Face Space when HF_TOKEN and HF_USER are set.
+# Nothing here writes back to the repository.
+#
+# The workflow_run path checks that the CI run was triggered by a push. CI also runs for pull
+# requests, and a pull request from a fork whose head branch is named main would otherwise pass
+# the branches filter below and deploy code nobody reviewed.
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+env:
+  IMAGE: ghcr.io/zulqarnain-10/credit-risk-service
+  SPACE_NAME: credit-risk-service
+
+jobs:
+  build-push:
+    name: Build and push image
+    if: >-
+      github.event_name != 'workflow_run'
+      || (github.event.workflow_run.conclusion == 'success'
+      && github.event.workflow_run.event == 'push')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      sha: ${{ steps.ref.outputs.sha }}
+    steps:
+      - name: Resolve the commit to deploy
+        id: ref
+        run: |
+          sha="${{ github.event.workflow_run.head_sha || github.sha }}"
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+          echo "short=${sha:0:7}" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.ref.outputs.sha }}
+      - uses: docker/setup-buildx-action@v3
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Image tags
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE }}
+          flavor: latest=false
+          tags: |
+            type=raw,value=sha-${{ steps.ref.outputs.short }}
+            type=raw,value=latest,enable=${{ github.event_name != 'push' }}
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  preflight:
+    name: Check Space configuration
+    if: >-
+      github.event_name != 'workflow_run'
+      || (github.event.workflow_run.conclusion == 'success'
+      && github.event.workflow_run.event == 'push')
+    runs-on: ubuntu-latest
+    outputs:
+      configured: ${{ steps.check.outputs.configured }}
+    steps:
+      - name: Look for HF_TOKEN and HF_USER
+        id: check
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          HF_USER: ${{ vars.HF_USER }}
+        run: |
+          if [ -n "$HF_TOKEN" ] && [ -n "$HF_USER" ]; then
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+            echo "Space deploy is configured for $HF_USER."
+          else
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "::notice title=Space deploy skipped::Set the repository secret HF_TOKEN and the repository variable HF_USER to deploy to Hugging Face Spaces."
+          fi
+
+  deploy-space:
+    name: Deploy to Hugging Face Space
+    needs: [build-push, preflight]
+    if: needs.preflight.outputs.configured == 'true'
+    runs-on: ubuntu-latest
+    env:
+      HF_USER: ${{ vars.HF_USER }}
+      DEPLOY_SHA: ${{ needs.build-push.outputs.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.build-push.outputs.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install huggingface_hub
+        run: python -m pip install huggingface_hub==0.36.1
+      - name: Stage and push the Space
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: >
+          python scripts/deploy_space.py
+          --hf-user "$HF_USER"
+          --space "$SPACE_NAME"
+          --sha "$DEPLOY_SHA"
+          --wait 900
+      - name: Smoke test the live Space
+        run: |
+          host="$(printf '%s' "$HF_USER-$SPACE_NAME" | tr '[:upper:]' '[:lower:]' | tr '_.' '--')"
+          python scripts/smoke_live.py --url "https://$host.hf.space" --sha "$DEPLOY_SHA" --timeout 600

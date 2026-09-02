@@ -1,0 +1,157 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  PYTHON_VERSION: "3.12"
+  PIP_DISABLE_PIP_VERSION_CHECK: "1"
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Install ruff
+        run: python -m pip install ruff==0.16.5
+      - name: Ruff check
+        run: python -m ruff check .
+      - name: Ruff format check
+        run: python -m ruff format --check .
+
+  test:
+    name: Tests
+    runs-on: ubuntu-latest
+    env:
+      DVC_NO_ANALYTICS: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: |
+            requirements.txt
+            requirements-pipeline.txt
+            requirements-dev.txt
+      - name: Install
+        run: python -m pip install -r requirements-dev.txt -e .
+      - name: Check the README metrics block against the reports
+        run: python -m credit_risk.sync_readme --check
+      # The split files are not committed. Building them here (fetch, validate, features, split)
+      # lets the model-contract tests re-score the shipped model instead of skipping.
+      - name: Build the data splits
+        run: python -m dvc repro split
+      - name: Pytest with coverage
+        run: python -m pytest
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-xml
+          path: coverage.xml
+          if-no-files-found: warn
+
+  reproduce:
+    name: Reproduce metrics
+    runs-on: ubuntu-latest
+    env:
+      MLFLOW_TRACKING_URI: file:./mlruns
+      DVC_NO_ANALYTICS: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: |
+            requirements.txt
+            requirements-pipeline.txt
+      - name: Install pipeline dependencies
+        run: python -m pip install -r requirements-pipeline.txt -e .
+      - name: Keep the committed metrics
+        run: git show HEAD:reports/metrics.json > "$RUNNER_TEMP/committed_metrics.json"
+      - name: Rebuild models and reports from raw data
+        run: python -m dvc repro -f
+      - name: Compare with the committed metrics (tolerance 0.005)
+        run: >
+          python scripts/compare_metrics.py
+          --committed "$RUNNER_TEMP/committed_metrics.json"
+          --fresh reports/metrics.json
+          --tolerance 0.005
+      - name: Upload the reproduced reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: reproduced-reports
+          path: |
+            reports/
+            models/version.json
+            configs/presets.json
+          if-no-files-found: warn
+
+  gitleaks:
+    name: Gitleaks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  docker:
+    name: Docker build and smoke
+    runs-on: ubuntu-latest
+    env:
+      IMAGE_TAG: credit-risk-service:ci
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Build the image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          load: true
+          tags: ${{ env.IMAGE_TAG }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Image size
+        run: |
+          bytes=$(docker image inspect "$IMAGE_TAG" --format '{{ .Size }}')
+          mb=$(( bytes / 1000000 ))
+          echo "Image size: ${mb} MB (${bytes} bytes)"
+          echo "Image size: ${mb} MB" >> "$GITHUB_STEP_SUMMARY"
+          if [ "$mb" -gt 400 ]; then
+            echo "::warning title=Image size::${mb} MB is above the 400 MB target"
+          fi
+      - name: Run the container
+        run: docker run -d --name api -p 8000:8000 "$IMAGE_TAG"
+      - name: Wait for /health and score the first preset
+        run: >
+          python3 scripts/smoke_live.py
+          --url http://127.0.0.1:8000
+          --timeout 60
+          --interval 2
+          --presets configs/presets.json
+      - name: Container logs
+        if: always()
+        run: docker logs api || true
+      - name: Stop the container
+        if: always()
+        run: docker rm -f api || true

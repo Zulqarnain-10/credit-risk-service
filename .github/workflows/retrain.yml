@@ -1,0 +1,78 @@
+name: Retrain
+
+# Manual only. Rebuilds the pipeline on the runner and opens a pull request with the refreshed
+# model, reports, and README metrics block. Nothing lands on main without review.
+#
+# Two GitHub rules apply to the pull request this workflow opens:
+# 1. It is created with the workflow's own GITHUB_TOKEN, and events raised by that token do not
+#    start other workflows, so the pull request shows no CI checks at first. Pushing a commit to
+#    its branch, or closing and reopening it, triggers CI in the usual way.
+# 2. Creating it needs the repository setting Settings > Actions > General >
+#    "Allow GitHub Actions to create and approve pull requests" switched on. Without it the last
+#    step fails with "GitHub Actions is not permitted to create or approve pull requests".
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: retrain
+  cancel-in-progress: false
+
+jobs:
+  retrain:
+    name: Retrain and open a pull request
+    runs-on: ubuntu-latest
+    env:
+      MLFLOW_TRACKING_URI: file:./mlruns
+      DVC_NO_ANALYTICS: "1"
+      PIP_DISABLE_PIP_VERSION_CHECK: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: |
+            requirements.txt
+            requirements-pipeline.txt
+      - name: Install pipeline dependencies
+        run: python -m pip install -r requirements-pipeline.txt -e .
+      - name: Keep the committed metrics
+        run: git show HEAD:reports/metrics.json > "$RUNNER_TEMP/committed_metrics.json"
+      - name: Rebuild models and reports from raw data
+        run: python -m dvc repro -f
+      - name: Refresh the README metrics block from the new reports
+        run: python -m credit_risk.sync_readme
+      - name: Write the pull request body
+        run: |
+          {
+            echo "Automated retrain from Retrain workflow run ${{ github.run_number }} on commit ${GITHUB_SHA::7}."
+            echo
+            echo "Metric deltas against the committed reports/metrics.json (tolerance 0.005):"
+            echo
+            python scripts/compare_metrics.py \
+              --committed "$RUNNER_TEMP/committed_metrics.json" \
+              --fresh reports/metrics.json \
+              --tolerance 0.005 \
+              --markdown || true
+          } > "$RUNNER_TEMP/pr_body.md"
+          cat "$RUNNER_TEMP/pr_body.md"
+      # Opened with GITHUB_TOKEN: see the note at the top of this file about CI checks and the
+      # repository setting this step needs.
+      - name: Open a pull request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          branch: retrain/${{ github.run_number }}
+          delete-branch: true
+          title: "Retrain: refreshed model and reports"
+          body-path: ${{ runner.temp }}/pr_body.md
+          commit-message: "Retrain: refreshed model and reports (run ${{ github.run_number }})"
+          add-paths: |
+            models/
+            reports/
+            configs/presets.json
+            dvc.lock
+            README.md
