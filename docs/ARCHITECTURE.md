@@ -146,9 +146,9 @@ request until a commit is pushed to its branch or it is closed and reopened.
   replace it by setting `MLFLOW_TRACKING_URI`.
 - GHCR. Free, authenticated with the workflow's own `GITHUB_TOKEN`, and it gives any reader a
   `docker run` line that needs no account.
-- Hugging Face Spaces. A free Docker host with a stable URL and no payment method; the cost is
-  that the Space sleeps and takes a few seconds to wake, which the README says next to the link.
-  `render.yaml` is the fallback.
+- Hugging Face Spaces. A Docker host with a stable URL; the Space sleeps and takes a few seconds
+  to wake, which the README says next to the link. Docker Spaces now require a paid Hugging Face
+  plan, so `render.yaml` (a free Render web service) is the documented fallback.
 - No Kubernetes. One process, one container, one model file. A single container is the honest
   scale of this service, and a cluster would add operational surface without adding proof.
 - Thresholds from `params.yaml`, not from code. The cost matrix is declared, labeled
