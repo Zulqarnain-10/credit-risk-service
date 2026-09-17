@@ -1,26 +1,27 @@
 /* credit-risk-service demo page: design tokens, layout, and components. */
 
 :root {
-  /* Color */
-  --cream: #FBF8F2;
+  /* Color — the "evergreen ledger" palette: this project deliberately does not use the
+     zulqarnainhassan.com brand colors. Deep pine grounds, emerald links, brass accents. */
+  --cream: #F7F8F3;
   --panel: #FFFFFF;
-  --line: rgba(19, 35, 59, 0.10);
-  --ink: #13233B;
-  --muted: #5B6B80;
-  --navy: #0A1628;
-  --deep: #070E1C;
-  --band-2: #0D1B33;
-  --line-d: #1E3355;
-  --chip-d: #0F1F38;
-  --fog: #EAF0F9;
-  --mist: #A2B4CE;
-  --blue: #3B96FF;
-  --blue-ink: #1560D6;
-  --coral: #FF6B35;
-  --coral-ink: #D9480F;
-  /* Coral-ink is 4.1:1 on cream, AA for large text only, so small coral text on light
-     grounds (chips, link hovers) uses coral-deep at 5.5:1. */
-  --coral-deep: #B33E0B;
+  --line: rgba(21, 42, 32, 0.10);
+  --ink: #152A20;
+  --muted: #58695C;
+  --navy: #0B1F16;
+  --deep: #06140D;
+  --band-2: #10291C;
+  --line-d: #234C36;
+  --chip-d: #143224;
+  --fog: #EAF4EC;
+  --mist: #A3C0AB;
+  --blue: #3ECF8E;
+  --blue-ink: #0E7A4A;
+  --coral: #E8A33D;
+  --coral-ink: #A97010;
+  /* Brass-ink is AA for large text only on the light ground, so small brass text
+     (chips, link hovers) uses the deep brass at 5.5:1+. */
+  --coral-deep: #7E5507;
 
   /* Type */
   --display: "Bricolage Grotesque", "Helvetica Neue", Arial, sans-serif;
@@ -150,7 +151,7 @@ h1 {
   max-width: 20ch;
 }
 
-/* The payoff phrase: Fraunces italic with a coral rule painted on the inline box,
+/* The payoff phrase: Fraunces italic with a brass rule painted on the inline box,
    0.05em thick, just under the baseline. It survives line wraps at 375 px. */
 h1 em {
   font-family: var(--serif);
@@ -214,7 +215,7 @@ h3 {
   line-height: 1.5;
   letter-spacing: 0;
   text-transform: none;
-  background: rgba(255, 107, 53, 0.14);
+  background: rgba(232, 163, 61, 0.16);
   color: var(--coral-deep);
   vertical-align: baseline;
 }
@@ -263,7 +264,7 @@ h3 {
 
 .hero {
   padding: clamp(20px, 3vw, 28px) 0 clamp(40px, 6vw, 72px);
-  background: radial-gradient(900px 420px at 85% -20%, rgba(59, 150, 255, 0.16), transparent 60%),
+  background: radial-gradient(900px 420px at 85% -20%, rgba(62, 207, 142, 0.14), transparent 60%),
     linear-gradient(180deg, var(--navy), var(--deep));
   border-bottom: 1px solid var(--line-d);
 }
@@ -608,6 +609,7 @@ legend {
 }
 
 .field label {
+  flex: 1;
   font-size: 0.875rem;
   font-weight: 500;
   line-height: 1.35;
@@ -631,7 +633,7 @@ legend {
 .field select {
   width: 100%;
   padding: 9px 12px;
-  border: 1px solid rgba(19, 35, 59, 0.22);
+  border: 1px solid rgba(21, 42, 32, 0.22);
   border-radius: var(--r);
   background: var(--panel);
   color: var(--ink);
@@ -643,7 +645,7 @@ legend {
 
 .field input:hover,
 .field select:hover {
-  border-color: rgba(19, 35, 59, 0.45);
+  border-color: rgba(21, 42, 32, 0.45);
 }
 
 .field input.has-unit {
