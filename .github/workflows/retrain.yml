@@ -30,8 +30,8 @@ jobs:
       DVC_NO_ANALYTICS: "1"
       PIP_DISABLE_PIP_VERSION_CHECK: "1"
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
           cache: pip
@@ -63,7 +63,7 @@ jobs:
       # Opened with GITHUB_TOKEN: see the note at the top of this file about CI checks and the
       # repository setting this step needs.
       - name: Open a pull request
-        uses: peter-evans/create-pull-request@v6
+        uses: peter-evans/create-pull-request@v8
         with:
           branch: retrain/${{ github.run_number }}
           delete-branch: true
